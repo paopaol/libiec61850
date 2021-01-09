@@ -260,6 +260,14 @@ MmsServer_installFileAccessHandler(MmsServer self, MmsFileAccessHandler handler,
     self->fileAccessHandler = handler;
     self->fileAccessHandlerParameter = parameter;
 }
+
+void
+MmsServer_installRouteFileHandler(MmsServer self, const char *matchedPattern,MmsRouteFileHandler handler, void* parameter)
+{
+    self->routeFileHandler = handler;
+    self->routeFileHandlerParameter = parameter;
+    StringUtils_copyStringToBuffer(matchedPattern, self->routeFilePattern);
+}
 #endif /* (MMS_FILE_SERVICE == 1) */
 
 #if (MMS_OBTAIN_FILE_SERVICE == 1)

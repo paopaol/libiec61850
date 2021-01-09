@@ -55,6 +55,15 @@ fileAccessHandler (void* parameter, MmsServerConnection connection, MmsFileServi
     return MMS_ERROR_NONE;
 }
 
+static MmsError
+routeFileHandler(void* parameter, const char* matchedPattern, MmsRouteFileList fileList)
+{
+    printf("fileRouteHandler:  matched-pattern: %s\n", matchedPattern);
+    MmsRouteFileList_append(fileList, "123.txt");
+    /* MmsRouteFileList_append(fileList, "456.txt"); */
+    return MMS_ERROR_NONE;
+}
+
 int
 main(int argc, char** argv)
 {
@@ -67,8 +76,10 @@ main(int argc, char** argv)
 
     IedServer_setFilestoreBasepath(iedServer, "./vmd-filestore/");
 
-    /* Set a callback handler to control file accesses */
+    MmsServer_installRouteFileHandler(mmsServer, "^/COMTRADE/NEWEST_[0-9]\\+$", routeFileHandler, NULL);
+    /* Senewest_200t a callback handler to control file accesses */
     MmsServer_installFileAccessHandler(mmsServer, fileAccessHandler, NULL);
+
 
     IedServer_setConnectionIndicationHandler(iedServer, (IedConnectionIndicationHandler) connectionHandler, NULL);
 

@@ -24,6 +24,7 @@
 #include "libiec61850_platform_includes.h"
 #include "mms_server_internal.h"
 #include "mms_client_internal.h"
+#include "hal_regex.h"
 
 #if (MMS_FILE_SERVICE == 1)
 
@@ -915,7 +916,7 @@ encodeFileSpecification(uint8_t tag, char* fileSpecification, uint8_t* buffer, i
 static int
 addFileEntriesToResponse(const char* basepath, uint8_t* buffer, int bufPos, int maxBufSize, char* directoryName, char** continueAfterFileName, bool* moreFollows)
 {
-	int directoryNameLength = strlen(directoryName);
+    int directoryNameLength = strlen(directoryName);
 
     DirectoryHandle directory = openDirectory(basepath, directoryName);
 
@@ -971,6 +972,7 @@ addFileEntriesToResponse(const char* basepath, uint8_t* buffer, int bufPos, int 
 
                 int bufferSpaceLeft = maxBufSize - bufPos;
 
+
                 if (overallEntrySize > bufferSpaceLeft) {
                     *moreFollows = true;
                 }
@@ -993,8 +995,18 @@ addFileEntriesToResponse(const char* basepath, uint8_t* buffer, int bufPos, int 
     return bufPos;
 }
 
+static bool 
+isMatchedRouteFilePattern(const char *pattern, const char *directoryName) 
+{
+    RegexHandle handle = Regex_comp(pattern);
+    int ret = Regex_exec(handle, directoryName);
+    Regex_free(handle);
+    return ret == 0;
+}
+
 static void
-createFileDirectoryResponse(const char* basepath, uint32_t invokeId, ByteBuffer* response, int maxPduSize, char* directoryName, char* continueAfterFileName)
+createFileDirectoryResponse(const char* basepath, uint32_t invokeId, ByteBuffer* response, int maxPduSize, char* directoryName, 
+		char* continueAfterFileName, const char *routeFilePattern,MmsRouteFileHandler routeFileHandler, void *fileRouteHandlerParameter)
 {
     int maxSize = maxPduSize - 3; /* reserve space for moreFollows */
     uint8_t* buffer = response->buffer;
@@ -1009,10 +1021,27 @@ createFileDirectoryResponse(const char* basepath, uint32_t invokeId, ByteBuffer*
         if (strlen(continueAfterFileName) == 0)
             continueAfterFileName = NULL;
     }
+    strcpy(directoryName, "/COMTRADE/NEWEST_20");
+    if(routeFileHandler && isMatchedRouteFilePattern(routeFilePattern, directoryName)){
+	    MmsRouteFileList fileList = MmsRouteFileList_create();
+	    routeFileHandler(fileRouteHandlerParameter, directoryName, fileList);
+		MmsRouteFileList element = MmsRouteFileList_getNext(fileList);
+		while(element){
+		    const char *file = MmsRouteFileList_getFile(element);
+            char filename[256] = {0};
+            StringUtils_copyStringToBuffer(file, filename);
+            tempCurPos = addFileEntriesToResponse(basepath, buffer, tempCurPos, maxSize, filename, &continueAfterFileName, &moreFollows);
+            if(tempCurPos < 0 || moreFollows){
+                break;
+            }
+            element = MmsRouteFileList_getNext(element);
+		}
+		MmsRouteFileList_destory(fileList);
+    }else{
+        tempCurPos = addFileEntriesToResponse(basepath, buffer, tempCurPos, maxSize, directoryName, &continueAfterFileName, &moreFollows);
+    }
 
-    tempCurPos = addFileEntriesToResponse(basepath, buffer, tempCurPos, maxSize, directoryName, &continueAfterFileName, &moreFollows);
-
-	if (tempCurPos < 0) {
+    if (tempCurPos < 0) {
 
        if (DEBUG_MMS_SERVER)
             printf("MMS_SERVER: Error opening directory!\n");
@@ -1214,9 +1243,9 @@ mmsServer_handleFileDirectoryRequest(
             return;
         }
     }
-
     createFileDirectoryResponse(MmsServerConnection_getFilesystemBasepath(connection),
-            invokeId, response, maxPduSize, filename, continueAfter);
+            invokeId, response, maxPduSize, filename, continueAfter, 
+	    connection->server->routeFilePattern,connection->server->routeFileHandler, connection->server->routeFileHandlerParameter);
 }
 
 #endif /* MMS_FILE_SERVICE == 1 */

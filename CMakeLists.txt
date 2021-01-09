@@ -76,13 +76,14 @@ include_directories(
 )
 
 set(API_HEADERS
-	hal/inc/hal_base.h
+    hal/inc/hal_base.h
     hal/inc/hal_time.h
     hal/inc/hal_thread.h
     hal/inc/hal_filesystem.h
     hal/inc/hal_ethernet.h
     hal/inc/hal_socket.h
     hal/inc/tls_config.h
+    hal/inc/hal_regex.h
     src/common/inc/libiec61850_common_api.h
     src/common/inc/linked_list.h
     src/iec61850/inc/iec61850_client.h

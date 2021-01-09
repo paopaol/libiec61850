@@ -28,6 +28,7 @@ set (lib_common_SRCS
 ./mms/iso_mms/client/mms_client_read.c
 ./mms/iso_mms/client/mms_client_journals.c
 ./mms/iso_mms/server/mms_read_service.c
+./mms/iso_mms/server/mms_route_file.c
 ./mms/iso_mms/server/mms_file_service.c
 ./mms/iso_mms/server/mms_association_service.c
 ./mms/iso_mms/server/mms_identify_service.c

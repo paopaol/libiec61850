@@ -164,6 +164,10 @@ struct sMmsServer {
 #if (MMS_FILE_SERVICE == 1)
     MmsFileAccessHandler fileAccessHandler;
     void* fileAccessHandlerParameter;
+
+    MmsRouteFileHandler routeFileHandler;
+    void* routeFileHandlerParameter;
+    char routeFilePattern[1024];
 #endif
 
 #if (CONFIG_SET_FILESTORE_BASEPATH_AT_RUNTIME == 1)

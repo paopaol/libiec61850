@@ -164,6 +164,29 @@ typedef MmsError (*MmsFileAccessHandler) (void* parameter, MmsServerConnection c
 LIB61850_API void
 MmsServer_installFileAccessHandler(MmsServer self, MmsFileAccessHandler handler, void* parameter);
 
+
+typedef struct sMmsRouteFileList *MmsRouteFileList;
+LIB61850_API MmsRouteFileList MmsRouteFileList_create();
+LIB61850_API void MmsRouteFileList_append(MmsRouteFileList fileList, const char *file);
+LIB61850_API MmsRouteFileList MmsRouteFileList_getNext(MmsRouteFileList fileList);
+LIB61850_API const char * MmsRouteFileList_getFile(MmsRouteFileList self);
+LIB61850_API void MmsRouteFileList_destory(MmsRouteFileList fileList);
+
+/**
+ * @brief 
+ *
+ * @param 
+ * @param connection
+ * @param service
+ * @param matchedPattern
+ * @param fileList
+ *
+ * @return 
+ */
+typedef MmsError (*MmsRouteFileHandler) (void* parameter, const char* matchedPattern, MmsRouteFileList fileList);
+
+LIB61850_API void
+MmsServer_installRouteFileHandler(MmsServer self, const char *pattern,MmsRouteFileHandler handler, void* parameter);
 /**
  * \brief Set the virtual filestore basepath for the MMS file services
  *
