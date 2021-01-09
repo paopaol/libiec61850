@@ -1021,7 +1021,6 @@ createFileDirectoryResponse(const char* basepath, uint32_t invokeId, ByteBuffer*
         if (strlen(continueAfterFileName) == 0)
             continueAfterFileName = NULL;
     }
-    strcpy(directoryName, "/COMTRADE/NEWEST_20");
     if(routeFileHandler && isMatchedRouteFilePattern(routeFilePattern, directoryName)){
 	    MmsRouteFileList fileList = MmsRouteFileList_create();
 	    routeFileHandler(fileRouteHandlerParameter, directoryName, fileList);
