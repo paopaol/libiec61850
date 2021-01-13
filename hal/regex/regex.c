@@ -9,7 +9,7 @@ struct sRegexHandle {
 RegexHandle Regex_comp(const char *regexString) {
   struct sRegexHandle *handle = NULL;
   handle = Memory_calloc(1, sizeof(struct sRegexHandle));
-  if (regcomp(&handle->re, regexString, 0) != 0) {
+  if (regcomp(&handle->re, regexString, REG_EXTENDED) != 0) {
     Memory_free(handle);
     return NULL;
   }
